@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one narrow column. Header, four-way mode switch, one working panel at a time: drop files, set options, run, save. */
+/* Layout: one narrow column. Header, mode switch, one working panel at a time: drop files, set options, run, save. */
 :root{
   --bg:#EDF0F3; --surface:#FFFFFF; --surface2:#F4F6F8; --fg:#121C26; --muted:#556575; --line:#D3DAE1;
   --accent:#D1206B; --accent-fg:#FFFFFF; --accent-soft:#FBE4EE;
@@ -34,7 +34,7 @@ header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
 header svg{flex:none;color:var(--accent)}
 h1{font:700 30px/1.1 var(--display);letter-spacing:-.015em;margin:0;text-wrap:balance}
 .tag{margin:4px 0 0;color:var(--muted);font-size:14px}
-.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:5px;background:var(--surface2);border:1px solid var(--line);border-radius:12px}
+.tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:5px;background:var(--surface2);border:1px solid var(--line);border-radius:12px}
 .tab{font:600 14px var(--display);padding:10px 8px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--accent);border-color:var(--line)}
 .tab:focus-visible,.btn:focus-visible,.ib:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -85,6 +85,35 @@ progress{width:100%;height:8px;accent-color:var(--accent)}
 .thumbs img{width:100%;aspect-ratio:3/4;object-fit:contain;background:var(--surface2);border-radius:4px}
 .thumbs figcaption{display:grid;gap:2px}
 .note{margin:0;padding:10px 12px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:13px}
+/* Crop tool: ratio chips, image stage, selection box with eight handles */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--body);padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip:focus-visible,.cbox:focus-visible{outline:3px solid var(--accent);outline-offset:0}
+.work{display:grid;gap:10px;min-width:0}
+.stagewrap{display:grid;place-items:center;padding:12px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;min-width:0;overflow:hidden}
+.stage{position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair;background-color:var(--surface);background-image:repeating-conic-gradient(var(--surface2) 0 25%,var(--surface) 0 50%);background-size:16px 16px}
+.stage canvas{display:block;pointer-events:none}
+.cbox{position:absolute;cursor:move;outline:2px solid var(--accent);box-shadow:0 0 0 9999px rgba(8,12,16,.58);touch-action:none}
+.cbox::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 33.333% 0/1px 100% no-repeat,
+  linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 66.666% 0/1px 100% no-repeat,
+  linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 0 33.333%/100% 1px no-repeat,
+  linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)) 0 66.666%/100% 1px no-repeat}
+.hd{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;touch-action:none}
+.hd::after{content:"";position:absolute;inset:9px;background:var(--surface);border:2px solid var(--accent);border-radius:3px}
+.hd[data-h="nw"]{left:0;top:0;cursor:nwse-resize}
+.hd[data-h="n"]{left:50%;top:0;cursor:ns-resize}
+.hd[data-h="ne"]{left:100%;top:0;cursor:nesw-resize}
+.hd[data-h="e"]{left:100%;top:50%;cursor:ew-resize}
+.hd[data-h="se"]{left:100%;top:100%;cursor:nwse-resize}
+.hd[data-h="s"]{left:50%;top:100%;cursor:ns-resize}
+.hd[data-h="sw"]{left:0;top:100%;cursor:nesw-resize}
+.hd[data-h="w"]{left:0;top:50%;cursor:ew-resize}
+.rin{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.rin b{font:500 14px var(--mono);color:var(--muted)}
+.rin .ib{height:38px}
+.result img{width:56px;height:56px;object-fit:contain;border-radius:4px;border:1px solid var(--line);background:var(--surface)}
 #toast{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;pointer-events:none;
   padding:12px max(16px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
 #toast span{max-width:520px;padding:10px 14px;border-radius:8px;background:var(--fg);color:var(--bg);font-size:14px;opacity:0;transition:opacity .15s}
@@ -100,7 +129,7 @@ progress{width:100%;height:8px;accent-color:var(--accent)}
     </svg>
     <div>
       <h1>Image2PDF</h1>
-      <p class="tag">Convert and shrink images and PDFs. Everything runs in your browser, nothing is uploaded.</p>
+      <p class="tag">Convert, crop and shrink images and PDFs. Everything runs in your browser, nothing is uploaded.</p>
     </div>
   </header>
 
@@ -110,6 +139,7 @@ progress{width:100%;height:8px;accent-color:var(--accent)}
     <button class="tab" role="tab" id="t-shrink-images" data-tab="shrink-images" aria-controls="cmi-panel">Shrink images</button>
     <button class="tab" role="tab" id="t-shrink-pdf" data-tab="shrink-pdf" aria-controls="cmp-panel">Shrink PDF</button>
     <button class="tab" role="tab" id="t-merge-pdfs" data-tab="merge-pdfs" aria-controls="mrg-panel">Merge PDFs</button>
+    <button class="tab" role="tab" id="t-crop-image" data-tab="crop-image" aria-controls="crp-panel">Crop image</button>
   </div>
 
   <!-- Images to PDF -->
@@ -230,6 +260,38 @@ progress{width:100%;height:8px;accent-color:var(--accent)}
     <progress id="mrg-bar" max="1" value="0" hidden></progress>
     <div class="status" id="mrg-status" role="status" aria-live="polite"></div>
     <div class="result" id="mrg-result" hidden></div>
+  </section>
+
+  <!-- Crop image -->
+  <section class="panel" id="crp-panel" role="tabpanel" data-panel="crop-image" aria-labelledby="t-crop-image" hidden>
+    <div><h2>Crop image</h2><p class="lead">Drag on the image to draw a selection, move it, or pull its handles to resize. Choose a ratio to lock the shape, or leave it free.</p></div>
+    <label class="drop" id="crp-drop"><input class="sr" id="crp-file" type="file" accept="image/*">
+      <strong>Drop an image here or choose a file</strong><span id="crp-info">JPG, PNG, WebP, GIF, BMP. One image at a time.</span></label>
+    <div class="work" id="crp-work" hidden>
+      <div class="listbar"><span class="meta" id="crp-read"></span>
+        <div class="actions"><button class="btn" type="button" id="crp-all">Select all</button><button class="btn" type="button" id="crp-rotl">Rotate left</button><button class="btn" type="button" id="crp-rotr">Rotate right</button><button class="btn" type="button" id="crp-reset">Reset</button></div></div>
+      <div class="stagewrap" id="crp-wrap"><div class="stage" id="crp-stage"><canvas id="crp-cv"></canvas>
+        <div class="cbox" id="crp-box" tabindex="0" role="group" aria-label="Crop selection. Arrow keys move it, hold Shift for larger steps.">
+          <div class="hd" data-h="nw"></div><div class="hd" data-h="n"></div><div class="hd" data-h="ne"></div><div class="hd" data-h="e"></div>
+          <div class="hd" data-h="se"></div><div class="hd" data-h="s"></div><div class="hd" data-h="sw"></div><div class="hd" data-h="w"></div>
+        </div></div></div>
+    </div>
+    <div class="field"><label id="crp-rl">Aspect ratio</label><div class="chips" id="crp-chips" role="group" aria-labelledby="crp-rl"></div></div>
+    <div class="opts">
+      <div class="field"><label for="crp-rw">Custom ratio</label>
+        <div class="rin"><input id="crp-rw" type="number" min="0.01" step="any" inputmode="decimal" placeholder="W"><b>:</b><input id="crp-rh" type="number" min="0.01" step="any" inputmode="decimal" placeholder="H" aria-label="Ratio height"><button class="ib" type="button" id="crp-swap" aria-label="Swap ratio width and height" disabled>Swap</button></div>
+        <small>Type any two numbers, such as 7:5.</small></div>
+      <div class="field"><label for="crp-w">Selection size</label>
+        <div class="rin"><input id="crp-w" type="number" min="1" step="1" inputmode="numeric" placeholder="W" disabled><b>×</b><input id="crp-h" type="number" min="1" step="1" inputmode="numeric" placeholder="H" aria-label="Selection height" disabled><span class="meta">px</span></div>
+        <small>Edit to set an exact size.</small></div>
+      <div class="field"><label for="crp-fmt">Output format</label>
+        <select id="crp-fmt"><option value="auto">Same as original</option><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option></select></div>
+      <div class="field"><label for="crp-quality">Quality <span id="crp-qv" class="meta">92</span></label>
+        <input id="crp-quality" type="range" min="40" max="100" value="92"></div>
+    </div>
+    <div class="actions"><button class="btn primary" type="button" id="crp-run" disabled>Crop image</button></div>
+    <div class="status" id="crp-status" role="status" aria-live="polite"></div>
+    <div class="result" id="crp-result" hidden></div>
   </section>
 </div>
 <div id="toast" aria-live="polite"><span></span></div>
@@ -591,7 +653,7 @@ $('#cmi-run').addEventListener('click',async function(){
 });
 (function(){var c=document.createElement('canvas');c.width=c.height=1;
   if(c.toDataURL('image/webp').indexOf('data:image/webp')!==0){
-    [$('#cmi-fmt'),$('#p2i-fmt')].forEach(function(s){$$('option[value="image/webp"]',s).forEach(function(o){o.remove();});});}
+    [$('#cmi-fmt'),$('#p2i-fmt'),$('#crp-fmt')].forEach(function(s){$$('option[value="image/webp"]',s).forEach(function(o){o.remove();});});}
 })();
 
 /* ---------- Shrink PDF ---------- */
@@ -691,12 +753,256 @@ $('#mrg-run').addEventListener('click',async function(){
   bar('mrg',null);busy('mrg',false,P5.items.length>=2);
 });
 
+/* ---------- Crop image ---------- */
+var C={base:null,src:null,file:null,nw:0,nh:0,k:1,rot:0,box:null,ratio:{kind:'free'},drag:null,lw:0};
+var PRESETS=['1:1','4:3','3:2','16:9','5:4','21:9','3:4','2:3','9:16','4:5'];
+var cl=function(v,a,b){return Math.min(Math.max(v,a),b);};
+function gcd(a,b){return b?gcd(b,a%b):a;}
+function ratioVal(){
+  var r=C.ratio;
+  if(r.kind==='free')return null;
+  if(r.kind==='orig')return C.nw&&C.nh?C.nw/C.nh:null;
+  return cl(r.w/r.h,0.05,20);
+}
+function minNat(){return Math.max(6,24/(C.k||1));}
+function ratioText(w,h){
+  w=Math.round(w);h=Math.round(h);if(!w||!h)return '';
+  var g=gcd(w,h),a=w/g,b=h/g;
+  return (a<=32&&b<=32)?a+':'+b:(w/h).toFixed(2)+':1';
+}
+function ratioKey(){var r=C.ratio;return r.kind==='preset'?r.key:r.kind;}
+function syncRatioUi(skipFill){
+  var key=ratioKey(),r=C.ratio;
+  $$('#crp-chips .chip').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-ratio')===key?'true':'false');});
+  $('#crp-swap').disabled=r.kind==='free';
+  if(!skipFill&&(r.kind==='preset'||r.kind==='custom')){$('#crp-rw').value=r.w;$('#crp-rh').value=r.h;}
+}
+/* Resize a box to ratio r around its centre, keeping about the same area and staying inside the image. */
+function fitRatio(b,r){
+  var area=Math.max(b.w*b.h,1),cx=b.x+b.w/2,cy=b.y+b.h/2;
+  var w=Math.sqrt(area*r),h=w/r,s=Math.min(1,C.nw/w,C.nh/h);
+  w*=s;h*=s;
+  return {x:cl(cx-w/2,0,C.nw-w),y:cl(cy-h/2,0,C.nh-h),w:w,h:h};
+}
+function initialBox(){
+  var m=.1,b={x:C.nw*m,y:C.nh*m,w:C.nw*(1-2*m),h:C.nh*(1-2*m)},r=ratioVal();
+  return r?fitRatio(b,r):b;
+}
+function fullBox(){
+  var r=ratioVal();if(!r)return {x:0,y:0,w:C.nw,h:C.nh};
+  var w=Math.min(C.nw,C.nh*r),h=w/r;
+  return {x:(C.nw-w)/2,y:(C.nh-h)/2,w:w,h:h};
+}
+function paintBox(){
+  var b=C.box;if(!b)return;
+  var k=C.k,el=$('#crp-box'),w=Math.round(b.w),h=Math.round(b.h),fw=$('#crp-w'),fh=$('#crp-h');
+  el.style.left=(b.x*k)+'px';el.style.top=(b.y*k)+'px';el.style.width=(b.w*k)+'px';el.style.height=(b.h*k)+'px';
+  if(document.activeElement!==fw)fw.value=w;
+  if(document.activeElement!==fh)fh.value=h;
+  $('#crp-read').textContent=w+' × '+h+' px · '+ratioText(w,h)+' · from '+Math.round(b.x)+', '+Math.round(b.y);
+}
+function setRatio(r,skipFill){
+  C.ratio=r;
+  if(C.src){var q=ratioVal();if(q)C.box=fitRatio(C.box,q);paintBox();}
+  syncRatioUi(skipFill);
+}
+function crpLayout(){
+  if(!C.src)return;
+  var wrap=$('#crp-wrap'),aw=wrap.clientWidth-26;if(aw<60)return;
+  C.lw=wrap.clientWidth;
+  var mh=Math.max(280,Math.min(640,Math.round(window.innerHeight*.7)));
+  var k=Math.min(aw/C.nw,mh/C.nh,3),dw=Math.max(1,Math.round(C.nw*k));
+  k=dw/C.nw;var dh=Math.max(1,Math.round(C.nh*k));
+  C.k=k;
+  var st=$('#crp-stage');st.style.width=dw+'px';st.style.height=dh+'px';
+  var cv=$('#crp-cv'),dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.max(1,Math.round(dw*dpr));cv.height=Math.max(1,Math.round(dh*dpr));
+  cv.style.width=dw+'px';cv.style.height=dh+'px';
+  var cx=cv.getContext('2d');cx.imageSmoothingQuality='high';cx.drawImage(C.src,0,0,cv.width,cv.height);
+  paintBox();
+}
+function rotated(cv,deg){
+  if(!deg)return cv;
+  var c=document.createElement('canvas'),flat=deg===180;
+  c.width=flat?cv.width:cv.height;c.height=flat?cv.height:cv.width;
+  var x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(cv,-cv.width/2,-cv.height/2);
+  return c;
+}
+function applyRotation(step){
+  if(!C.base)return;
+  C.rot=(C.rot+step+360)%360;C.src=rotated(C.base,C.rot);C.nw=C.src.width;C.nh=C.src.height;
+  C.box=initialBox();$('#crp-result').hidden=true;crpLayout();
+}
+function outType(){
+  var v=$('#crp-fmt').value;if(v!=='auto')return v;
+  var t=C.file?C.file.type:'',n=C.file?C.file.name:'';
+  if(t==='image/jpeg'||t==='image/webp'||t==='image/png')return t;
+  if(/\.jpe?g$/i.test(n))return 'image/jpeg';
+  if(/\.webp$/i.test(n))return 'image/webp';
+  return 'image/png';
+}
+function syncCrpQ(){$('#crp-quality').disabled=outType()==='image/png';}
+function customFromBox(){
+  if(!C.box)return {w:1,h:1};
+  var w=Math.round(C.box.w),h=Math.round(C.box.h),g=gcd(w,h)||1,a=w/g,b=h/g;
+  return (a<=32&&b<=32)?{w:a,h:b}:{w:+(C.box.w/C.box.h).toFixed(2),h:1};
+}
+function pickRatio(key){
+  if(key==='free')setRatio({kind:'free'});
+  else if(key==='orig')setRatio({kind:'orig'});
+  else if(key==='custom'){
+    var w=parseFloat($('#crp-rw').value),h=parseFloat($('#crp-rh').value);
+    if(!(w>0&&h>0)){var c=customFromBox();w=c.w;h=c.h;}
+    setRatio({kind:'custom',w:w,h:h});
+  }else{var p=key.split(':');setRatio({kind:'preset',w:+p[0],h:+p[1],key:key});}
+}
+[['free','Free'],['orig','Original']].concat(PRESETS.map(function(p){return [p,p];})).concat([['custom','Custom']]).forEach(function(c){
+  $('#crp-chips').append(h('button',{class:'chip',type:'button','data-ratio':c[0],'aria-pressed':c[0]==='free'?'true':'false',onclick:function(){pickRatio(c[0]);}},c[1]));
+});
+$('#crp-swap').addEventListener('click',function(){
+  var r=C.ratio,w,hh;if(r.kind==='free')return;
+  if(r.kind==='orig'){w=C.nh;hh=C.nw;}else{w=r.h;hh=r.w;}
+  var key=w+':'+hh;
+  setRatio(PRESETS.indexOf(key)>=0?{kind:'preset',w:w,h:hh,key:key}:{kind:'custom',w:w,h:hh});
+});
+['rw','rh'].forEach(function(id){
+  $('#crp-'+id).addEventListener('input',function(){
+    var w=parseFloat($('#crp-rw').value),hh=parseFloat($('#crp-rh').value);
+    if(w>0&&hh>0)setRatio({kind:'custom',w:w,h:hh},true);
+  });
+});
+['w','h'].forEach(function(which){
+  $('#crp-'+which).addEventListener('input',function(){
+    if(!C.src)return;
+    var v=parseFloat(this.value);if(!(v>=1))return;
+    var b=C.box,r=ratioVal(),w=b.w,hh=b.h;
+    if(which==='w'){w=v;if(r)hh=w/r;}else{hh=v;if(r)w=hh*r;}
+    var s=r?Math.min(1,C.nw/w,C.nh/hh):1;
+    w=Math.min(w*s,C.nw);hh=Math.min(hh*s,C.nh);
+    C.box={x:cl(b.x,0,C.nw-w),y:cl(b.y,0,C.nh-hh),w:w,h:hh};paintBox();
+  });
+});
+$('#crp-fmt').addEventListener('change',syncCrpQ);
+$('#crp-quality').addEventListener('input',function(){$('#crp-qv').textContent=this.value;});
+$('#crp-all').addEventListener('click',function(){if(!C.src)return;C.box=fullBox();paintBox();});
+$('#crp-rotl').addEventListener('click',function(){applyRotation(-90);});
+$('#crp-rotr').addEventListener('click',function(){applyRotation(90);});
+$('#crp-reset').addEventListener('click',function(){
+  if(!C.base)return;
+  C.rot=0;C.src=C.base;C.nw=C.base.width;C.nh=C.base.height;C.ratio={kind:'free'};
+  C.box=initialBox();syncRatioUi();$('#crp-result').hidden=true;crpLayout();
+});
+
+/* Drawing, moving and resizing the selection (all maths in natural image pixels) */
+function corner(ax,ay,sx,sy,w,hh,r){
+  var aw=sx>0?C.nw-ax:ax,ah=sy>0?C.nh-ay:ay,mn=minNat();
+  if(r){
+    w=Math.max(w,hh*r);
+    var maxW=Math.min(aw,ah*r),minW=Math.max(mn,mn*r);
+    w=cl(w,minW,maxW);hh=w/r;
+  }else{w=cl(w,mn,aw);hh=cl(hh,mn,ah);}
+  return {x:sx>0?ax:ax-w,y:sy>0?ay:ay-hh,w:w,h:hh};
+}
+function resize(hd,o,dx,dy,r){
+  var mn=minNat(),L=o.x,T=o.y,Rt=o.x+o.w,B=o.y+o.h,cx=o.x+o.w/2,cy=o.y+o.h/2,w,hh;
+  if(hd.length===2){
+    var west=hd.indexOf('w')>=0,north=hd.indexOf('n')>=0;
+    return corner(west?Rt:L,north?B:T,west?-1:1,north?-1:1,Math.max(0,o.w+(west?-dx:dx)),Math.max(0,o.h+(north?-dy:dy)),r);
+  }
+  if(hd==='e'||hd==='w'){
+    var east=hd==='e',room=east?C.nw-L:Rt;
+    w=Math.max(0,o.w+(east?dx:-dx));
+    if(r){var maxH=2*Math.min(cy,C.nh-cy),maxW=Math.min(room,maxH*r);w=cl(w,Math.max(mn,mn*r),maxW);hh=w/r;}
+    else{w=cl(w,mn,room);hh=o.h;}
+    return {x:east?L:Rt-w,y:r?cy-hh/2:T,w:w,h:hh};
+  }
+  var south=hd==='s',roomY=south?C.nh-T:B;
+  hh=Math.max(0,o.h+(south?dy:-dy));
+  if(r){var maxW2=2*Math.min(cx,C.nw-cx),maxH2=Math.min(roomY,maxW2/r);hh=cl(hh,Math.max(mn,mn/r),maxH2);w=hh*r;}
+  else{hh=cl(hh,mn,roomY);w=o.w;}
+  return {x:r?cx-w/2:L,y:south?T:B-hh,w:w,h:hh};
+}
+var stage=$('#crp-stage');
+function natPt(e){
+  var rc=stage.getBoundingClientRect(),kk=(rc.width/C.nw)||C.k;
+  return {x:(e.clientX-rc.left)/kk,y:(e.clientY-rc.top)/kk};
+}
+stage.addEventListener('pointerdown',function(e){
+  if(!C.src||(e.pointerType==='mouse'&&e.button!==0))return;
+  var hd=e.target.closest('.hd'),inBox=e.target.closest('#crp-box'),p=natPt(e);
+  var mode=hd?hd.getAttribute('data-h'):inBox?'move':'new';
+  C.drag={id:e.pointerId,mode:mode,sx:p.x,sy:p.y,started:mode!=='new',ax:cl(p.x,0,C.nw),ay:cl(p.y,0,C.nh),
+    o:{x:C.box.x,y:C.box.y,w:C.box.w,h:C.box.h}};
+  try{stage.setPointerCapture(e.pointerId);}catch(x){}
+  e.preventDefault();
+  if(mode!=='new')$('#crp-box').focus({preventScroll:true});
+});
+stage.addEventListener('pointermove',function(e){
+  var d=C.drag;if(!d||e.pointerId!==d.id)return;
+  var p=natPt(e),dx=p.x-d.sx,dy=p.y-d.sy,o=d.o,r=ratioVal();
+  if(d.mode==='move'){
+    C.box={x:cl(o.x+dx,0,C.nw-o.w),y:cl(o.y+dy,0,C.nh-o.h),w:o.w,h:o.h};
+  }else if(d.mode==='new'){
+    if(!d.started){if(Math.hypot(dx,dy)*C.k<5)return;d.started=true;}
+    var px=cl(p.x,0,C.nw),py=cl(p.y,0,C.nh);
+    C.box=corner(d.ax,d.ay,px>=d.ax?1:-1,py>=d.ay?1:-1,Math.abs(px-d.ax),Math.abs(py-d.ay),r);
+  }else{C.box=resize(d.mode,o,dx,dy,r);}
+  paintBox();
+});
+['pointerup','pointercancel','lostpointercapture'].forEach(function(t){
+  stage.addEventListener(t,function(e){if(C.drag&&e.pointerId===C.drag.id)C.drag=null;});
+});
+$('#crp-box').addEventListener('keydown',function(e){
+  var st=e.shiftKey?10:1,dx=0,dy=0;
+  if(e.key==='ArrowLeft')dx=-st;else if(e.key==='ArrowRight')dx=st;else if(e.key==='ArrowUp')dy=-st;else if(e.key==='ArrowDown')dy=st;else return;
+  var b=C.box;C.box={x:cl(b.x+dx,0,C.nw-b.w),y:cl(b.y+dy,0,C.nh-b.h),w:b.w,h:b.h};paintBox();e.preventDefault();
+});
+if(window.ResizeObserver){new ResizeObserver(function(){if(C.src&&$('#crp-wrap').clientWidth!==C.lw)crpLayout();}).observe($('#crp-wrap'));}
+else window.addEventListener('resize',crpLayout);
+
+async function loadCrop(files){
+  var f=files.filter(isImg)[0];
+  if(!f){if(files.length)toast('Please choose an image file.');return;}
+  say('crp','Opening image…');$('#crp-result').hidden=true;
+  try{
+    var bm=await decode(f),cv=document.createElement('canvas');
+    cv.width=bm.width;cv.height=bm.height;cv.getContext('2d').drawImage(bm,0,0);if(bm.close)bm.close();
+    C.base=cv;C.src=cv;C.file=f;C.rot=0;C.nw=cv.width;C.nh=cv.height;C.box=initialBox();
+    $('#crp-info').textContent=f.name+' · '+C.nw+'×'+C.nh+' px · '+fmt(f.size);
+    $('#crp-work').hidden=false;$('#crp-w').disabled=false;$('#crp-h').disabled=false;
+    syncRatioUi();syncCrpQ();say('crp','');busy('crp',false,true);crpLayout();
+  }catch(e){say('crp','Could not open this image. It may be damaged or too large.','err');}
+}
+wireDrop($('#crp-drop'),$('#crp-file'),loadCrop);
+$('#crp-run').addEventListener('click',async function(){
+  if(!C.src)return;
+  busy('crp',true,true);$('#crp-result').hidden=true;say('crp','Cropping…');
+  try{
+    var b=C.box,x=cl(Math.round(b.x),0,C.nw-1),y=cl(Math.round(b.y),0,C.nh-1);
+    var w=cl(Math.round(b.w),1,C.nw-x),hh=cl(Math.round(b.h),1,C.nh-y);
+    var type=outType(),q=+$('#crp-quality').value/100;
+    var c=document.createElement('canvas');c.width=w;c.height=hh;
+    var cx=c.getContext('2d');
+    if(type==='image/jpeg'){cx.fillStyle='#fff';cx.fillRect(0,0,w,hh);}
+    cx.drawImage(C.src,x,y,w,hh,0,0,w,hh);
+    var blob=await toBlob(c,type,type==='image/png'?undefined:q);
+    var ext=blob.type==='image/webp'?'webp':blob.type==='image/png'?'png':'jpg';
+    var name=baseName(C.file.name)+'-cropped.'+ext;
+    showSingle('crp',name,blob,[h('b',{text:name}),h('span',{text:w+' × '+hh+' px · '+fmt(blob.size)})]);
+    var th=scaledCanvas(c,Math.min(1,112/Math.max(w,hh)),0).toDataURL('image/jpeg',.8);
+    $('#crp-result').prepend(h('img',{src:th,alt:'Preview of the cropped image',width:'56',height:'56'}));
+    say('crp','Crop ready.','ok');
+  }catch(e){say('crp','Could not crop this image. Try a smaller selection.','err');}
+  busy('crp',false,!!C.src);
+});
+
 /* ---------- tabs ---------- */
-var TABS=['images-to-pdf','pdf-to-images','shrink-images','shrink-pdf','merge-pdfs'];
+var TABS=['images-to-pdf','pdf-to-images','shrink-images','shrink-pdf','merge-pdfs','crop-image'];
 function show(id){
   if(TABS.indexOf(id)<0)id=TABS[0];
   $$('[role=tab]').forEach(function(b){var on=b.dataset.tab===id;b.setAttribute('aria-selected',on?'true':'false');b.tabIndex=on?0:-1;});
   $$('.panel').forEach(function(p){p.hidden=p.dataset.panel!==id;});
+  if(id==='crop-image')crpLayout();
 }
 $$('[role=tab]').forEach(function(b,i,all){
   b.addEventListener('click',function(){show(b.dataset.tab);try{history.replaceState(null,'','#'+b.dataset.tab);}catch(e){}});
@@ -711,5 +1017,6 @@ renderP1();renderP3();renderP5();
 getDownloads();
 })();
 </script>
+
 
 </body></html>
